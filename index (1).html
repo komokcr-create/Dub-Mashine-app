@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Озвучка відео</title>
+<style>
+:root{--bg:#f2f3f7;--cd:#fff;--tx:#17181c;--mu:#6c6f7a;--ac:#ef4444;--bl:#4f46e5;--bd:#e0e2ea;--tr:#e9eaf1;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1014;--cd:#1a1b21;--tx:#f1f2f6;--mu:#9a9dab;--bd:#2c2e37;--tr:#262830}}
+:root[data-theme="dark"]{--bg:#0f1014;--cd:#1a1b21;--tx:#f1f2f6;--mu:#9a9dab;--bd:#2c2e37;--tr:#262830}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:560px;margin:0 auto;padding:12px 14px 40px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+h1{font-size:20px;margin:0}
+h2{font-size:13px;margin:0 0 6px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em}
+.card{background:var(--cd);border:1px solid var(--bd);border-radius:16px;padding:12px;margin-bottom:12px}
+button{font:inherit;border:0;border-radius:12px;padding:12px;background:var(--bl);color:#fff;font-weight:600;cursor:pointer}
+button.sec{background:var(--tr);color:var(--tx)}
+button.ic{width:42px;height:42px;padding:0;font-size:20px;background:var(--tr);color:var(--tx);border-radius:50%}
+button:disabled{opacity:.45}
+.drop{display:block;text-align:center;padding:34px 12px;border:2px dashed var(--bd);border-radius:16px;color:var(--mu)}
+.drop b{display:block;color:var(--tx);font-size:18px;margin-bottom:4px}
+video{width:100%;max-height:36vh;background:#000;border-radius:12px;display:block}
+#tl{position:relative;height:60px;margin:10px 0 4px;background:var(--tr);border-radius:10px;overflow:hidden;touch-action:none}
+.blk{position:absolute;top:8px;bottom:8px;border-radius:6px;opacity:.9;min-width:4px}
+#ph{position:absolute;top:0;bottom:0;width:2px;background:var(--ac);left:0;pointer-events:none}
+.tr{display:flex;align-items:center;gap:10px;margin-top:8px}
+#tm{flex:1;font-variant-numeric:tabular-nums;color:var(--mu);font-size:14px}
+#pl{width:56px;height:56px;border-radius:50%;font-size:20px;padding:0}
+#rec{height:56px;border-radius:28px;background:var(--ac);padding:0 22px}
+#mt{height:6px;background:var(--tr);border-radius:3px;margin-top:10px;overflow:hidden}
+#mb{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#eab308,#ef4444)}
+#st{font-size:14px;color:var(--mu);min-height:20px;margin-top:8px}
+.row{display:flex;align-items:center;gap:8px;margin:10px 0}
+.row>label{flex:0 0 118px;font-size:14px}
+.row input[type=range],.row select{flex:1;min-width:0}
+.row select{font:inherit;padding:8px;border-radius:10px;border:1px solid var(--bd);background:var(--cd);color:var(--tx)}
+.row output{flex:0 0 52px;text-align:right;font-size:13px;color:var(--mu)}
+.take{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--bd)}
+.take:first-of-type{border-top:0}
+.take i{width:10px;height:10px;border-radius:50%;flex:0 0 10px}
+.take .nm{flex:0 0 72px;font-size:14px}.take small{display:block;color:var(--mu)}
+.take input{flex:1;min-width:0}
+.take button{padding:6px 10px;border-radius:10px}
+.sw{display:flex;justify-content:space-between;align-items:center;margin:12px 0;font-size:15px}
+.sw input{width:22px;height:22px}
+#sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;z-index:20}
+#sheet>div{background:var(--cd);width:100%;max-width:560px;margin:0 auto;border-radius:20px 20px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px));max-height:85vh;overflow:auto}
+.hide{display:none!important}
+small.h{color:var(--mu);font-size:12px;display:block;margin:-4px 0 8px}
+input[type=file]{display:none}
+</style>
+</head>
+<body>
+<main>
+<header><h1>🎙️ Озвучка</h1><button id="gear" class="ic" aria-label="Налаштування">⚙</button></header>
+
+<label id="pick" class="drop" for="f"><b>Обрати відео</b>з пам’яті телефону</label>
+<input id="f" type="file" accept="video/*">
+
+<div id="app" class="hide">
+ <div class="card">
+  <video id="v" playsinline></video>
+  <div id="tl"><div id="ph"></div></div>
+  <div class="tr"><button id="pl" aria-label="Відтворити">▶</button><span id="tm">0:00 / 0:00</span><button id="rec">● Запис</button></div>
+  <div id="mt"><div id="mb"></div></div>
+  <div id="st">Підказка: торкніться смуги часу, щоб перейти в потрібне місце. Краще з навушниками.</div>
+ </div>
+ <div class="card"><h2>Доріжки голосу</h2><div id="takes"></div></div>
+ <div class="card"><button id="expv" style="width:100%">Зберегти лише голос (WAV)</button>
+  <small class="h" style="margin:8px 0 14px">Швидко й надійно. Потім додайте цей файл до відео в CapCut як аудіо.</small>
+  <button id="exp" class="sec" style="width:100%">Зберегти відео з озвучкою</button>
+  <small class="h" style="margin:8px 0 0">Збереження йде в реальному часі, не згортайте застосунок до кінця.</small></div>
+</div>
+</main>
+
+<div id="sheet" class="hide"><div>
+ <div style="display:flex;justify-content:space-between;align-items:center"><strong style="font-size:18px">Налаштування</strong><button id="cl" class="ic">✕</button></div>
+ <h2 style="margin-top:14px">Мікрофон</h2>
+ <div class="row"><select id="mic"></select><button id="rf" class="sec">Оновити</button></div>
+ <small class="h">Підключіть Bluetooth-гарнітуру й натисніть «Оновити». У списку з’явиться вибір між мікрофоном телефону та гарнітурою.</small>
+ <div class="sw"><span>Шумозаглушення</span><input type="checkbox" id="ns"></div>
+ <div class="sw"><span>Придушення відлуння</span><input type="checkbox" id="ec"></div>
+ <div class="sw"><span>Авторегулювання гучності</span><input type="checkbox" id="agc"></div>
+ <h2 style="margin-top:16px">Мікс</h2>
+ <div class="row"><label for="ov">Звук відео</label><input id="ov" type="range" min="0" max="1.5" step="0.05"><output id="ovo"></output></div>
+ <div class="row"><label for="sh">Зсув голосу</label><input id="sh" type="range" min="-300" max="300" step="10"><output id="sho"></output></div>
+ <h2 style="margin-top:16px">Вигляд</h2>
+ <div class="row"><label for="th">Тема</label><select id="th"><option value="auto">Авто</option><option value="light">Світла</option><option value="dark">Темна</option></select></div>
+</div></div>
+
+<script>
+const $=s=>document.querySelector(s),v=$('#v'),st=$('#st'),recBtn=$('#rec');
+let ctx,bus,mon,dest,vg,takes=[],active=[],seq=0,mr=null,mstream=null,busy=false,raf=0;
+let cfg={mic:'',ns:true,ec:true,agc:false,sh:0,ov:1,th:'auto'};
+try{Object.assign(cfg,JSON.parse(localStorage.getItem('ozv')||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem('ozv',JSON.stringify(cfg))}catch(e){}};
+const say=t=>st.textContent=t;
+const fmt=s=>{s=s||0;return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')};
+const col=i=>'hsl('+((i*67+200)%360)+',70%,55%)';
+
+function applyTheme(){const r=document.documentElement;if(cfg.th==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',cfg.th)}
+function init(){
+ if(ctx)return;
+ ctx=new (window.AudioContext||window.webkitAudioContext)();
+ bus=ctx.createGain();mon=ctx.createGain();dest=ctx.createMediaStreamDestination();
+ bus.connect(mon);mon.connect(ctx.destination);bus.connect(dest);
+ vg=ctx.createGain();ctx.createMediaElementSource(v).connect(vg);vg.connect(bus);vg.gain.value=cfg.ov;
+}
+
+/* Налаштування */
+const NAMES={15:'Мікрофон телефону',7:'Bluetooth-гарнітура',26:'Bluetooth LE',3:'Провідна гарнітура',22:'USB-гарнітура',11:'USB-мікрофон'};
+function addOpt(val,txt){const o=document.createElement('option');o.value=val;o.textContent=txt;$('#mic').appendChild(o)}
+async function loadMics(ask){
+ const sel=$('#mic');sel.innerHTML='';
+ if(window.Android){
+  try{JSON.parse(Android.inputs()).forEach(d=>addOpt(d.id,(NAMES[d.type]||'Мікрофон')+(d.name&&d.type!==15?' · '+d.name:'')))}catch(e){}
+ }else{
+  try{
+   if(ask){const s=await navigator.mediaDevices.getUserMedia({audio:true});s.getTracks().forEach(t=>t.stop())}
+   (await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='audioinput').forEach((d,i)=>addOpt(d.deviceId,d.label||'Мікрофон '+(i+1)));
+  }catch(e){say('Немає доступу до мікрофона.')}
+ }
+ if(!sel.options.length)addOpt('','Типовий мікрофон');
+ sel.value=cfg.mic;if(sel.value!==cfg.mic)sel.value=sel.options[0].value;
+ cfg.mic=sel.value;
+}
+function bindSettings(){
+ for(const k of ['ns','ec','agc']){const e=$('#'+k);e.checked=cfg[k];e.onchange=()=>{cfg[k]=e.checked;save()}}
+ $('#ov').value=cfg.ov;$('#ovo').textContent=Math.round(cfg.ov*100)+'%';
+ $('#ov').oninput=e=>{cfg.ov=+e.target.value;if(vg)vg.gain.value=cfg.ov;$('#ovo').textContent=Math.round(cfg.ov*100)+'%';save()};
+ $('#sh').value=cfg.sh;$('#sho').textContent=cfg.sh+' мс';
+ $('#sh').oninput=e=>{cfg.sh=+e.target.value;$('#sho').textContent=cfg.sh+' мс';save();if(!v.paused)schedule()};
+ $('#th').value=cfg.th;$('#th').onchange=e=>{cfg.th=e.target.value;applyTheme();save()};
+ $('#mic').onchange=e=>{cfg.mic=e.target.value;save();if(window.Android)Android.useInput(+cfg.mic)};
+ $('#rf').onclick=()=>loadMics(true);
+ $('#gear').onclick=()=>{$('#sheet').classList.remove('hide');loadMics(false)};
+ $('#cl').onclick=()=>$('#sheet').classList.add('hide');
+ $('#sheet').onclick=e=>{if(e.target.id==='sheet')e.target.classList.add('hide')};
+ if(navigator.mediaDevices)navigator.mediaDevices.addEventListener&&navigator.mediaDevices.addEventListener('devicechange',()=>{if(!$('#sheet').classList.contains('hide'))loadMics(false)});
+}
+applyTheme();bindSettings();
+
+/* Відео */
+$('#f').onchange=e=>{
+ const f=e.target.files[0];if(!f)return;
+ init();stopAll();takes=[];render();
+ v.src=URL.createObjectURL(f);
+ $('#app').classList.remove('hide');$('#pick').classList.add('hide');
+ say('Відео завантажено: '+f.name);
+};
+v.addEventListener('loadedmetadata',()=>{drawTl();upd()});
+function upd(){
+ const d=v.duration||0;
+ $('#ph').style.left=(d?v.currentTime/d*100:0)+'%';
+ $('#tm').textContent=fmt(v.currentTime)+' / '+fmt(d);
+ $('#pl').textContent=v.paused?'▶':'❚❚';
+}
+function loop(){upd();raf=requestAnimationFrame(loop)}
+$('#tl').onpointerdown=e=>{
+ const r=$('#tl').getBoundingClientRect();
+ const seek=x=>{v.currentTime=Math.max(0,Math.min(1,(x-r.left)/r.width))*(v.duration||0);upd()};
+ seek(e.clientX);
+ const mv=ev=>seek(ev.clientX),up=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up)};
+ addEventListener('pointermove',mv);addEventListener('pointerup',up);
+};
+$('#pl').onclick=()=>{init();ctx.resume();v.paused?v.play():v.pause()};
+function drawTl(){
+ const tl=$('#tl');tl.querySelectorAll('.blk').forEach(b=>b.remove());
+ const d=v.duration||1;
+ takes.forEach((k,i)=>{
+  const b=document.createElement('div');b.className='blk';
+  b.style.left=(k.start/d*100)+'%';b.style.width=(k.buf.duration/d*100)+'%';
+  b.style.background=col(i);tl.insertBefore(b,$('#ph'));
+ });
+}
+
+/* Відтворення міксу */
+function stopAll(){active.forEach(s=>{try{s.stop()}catch(e){}});active=[]}
+function schedule(){
+ stopAll();if(!ctx)return;
+ const t=v.currentTime,sh=cfg.sh/1000;
+ for(const k of takes){
+  if(k.muted)continue;
+  const when=k.start+sh-t,dur=k.buf.duration;
+  const s=ctx.createBufferSource();s.buffer=k.buf;s.connect(k.gain);
+  if(when>=0)s.start(ctx.currentTime+when);else if(-when<dur)s.start(0,-when);else continue;
+  active.push(s);
+ }
+}
+v.addEventListener('play',()=>{if(ctx){ctx.resume();schedule()}cancelAnimationFrame(raf);loop()});
+v.addEventListener('pause',()=>{stopAll();cancelAnimationFrame(raf);upd()});
+v.addEventListener('ended',()=>{stopAll();cancelAnimationFrame(raf);upd();if(mr)stopRec()});
+v.addEventListener('seeked',()=>{if(!v.paused)schedule();upd()});
+
+function render(){
+ const box=$('#takes');box.innerHTML='';
+ if(!takes.length){box.innerHTML='<div style="color:var(--mu);font-size:14px">Поки порожньо. Оберіть момент на смузі часу й натисніть «Запис».</div>';drawTl();return}
+ takes.forEach((k,i)=>{
+  const d=document.createElement('div');d.className='take';
+  const c=document.createElement('i');c.style.background=col(i);
+  const nm=document.createElement('div');nm.className='nm';nm.textContent=k.name;
+  const sm=document.createElement('small');sm.textContent='з '+fmt(k.start);nm.appendChild(sm);
+  const r=document.createElement('input');r.type='range';r.min=0;r.max=2;r.step=0.05;r.value=k.vol;
+  r.oninput=()=>{k.vol=+r.value;k.gain.gain.value=k.muted?0:k.vol};
+  const m=document.createElement('button');m.className='sec';m.textContent=k.muted?'🔇':'🔊';
+  m.onclick=()=>{k.muted=!k.muted;k.gain.gain.value=k.muted?0:k.vol;m.textContent=k.muted?'🔇':'🔊';if(!v.paused)schedule()};
+  const x=document.createElement('button');x.className='sec';x.textContent='✕';
+  x.onclick=()=>{k.gain.disconnect();takes=takes.filter(z=>z!==k);if(!v.paused)schedule();render()};
+  d.append(c,nm,r,m,x);box.appendChild(d);
+ });
+ drawTl();
+}
+render();
+
+/* Запис */
+async function startRec(){
+ init();await ctx.resume();
+ const a={echoCancellation:cfg.ec,noiseSuppression:cfg.ns,autoGainControl:cfg.agc};
+ if(!window.Android&&cfg.mic)a.deviceId={exact:cfg.mic};
+ try{mstream=await navigator.mediaDevices.getUserMedia({audio:a})}
+ catch(e){say('Немає доступу до вибраного мікрофона. Перевірте дозвіл і налаштування.');return}
+ const t0=v.currentTime,chunks=[];
+ const an=ctx.createAnalyser();an.fftSize=512;ctx.createMediaStreamSource(mstream).connect(an);
+ const buf=new Uint8Array(an.fftSize);
+ const meter=()=>{if(!mr){$('#mb').style.width='0';return}
+  an.getByteTimeDomainData(buf);let p=0;for(const x of buf)p=Math.max(p,Math.abs(x-128));
+  $('#mb').style.width=Math.min(100,p/128*140)+'%';requestAnimationFrame(meter)};
+ mr=new MediaRecorder(mstream);
+ mr.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+ mr.onstop=async()=>{
+  mstream.getTracks().forEach(t=>t.stop());
+  try{
+   const b=await ctx.decodeAudioData(await new Blob(chunks).arrayBuffer());
+   const g=ctx.createGain();g.connect(bus);
+   takes.push({name:'Дубль '+(++seq),start:t0,buf:b,gain:g,vol:1,muted:false});
+   render();say('Записано. Натисніть ▶, щоб послухати мікс.');
+  }catch(e){say('Не вдалося обробити запис на цьому пристрої.')}
+ };
+ mr.start();v.play();meter();
+ recBtn.textContent='■ Стоп';say('● Іде запис…');
+}
+function stopRec(){
+ if(mr&&mr.state!=='inactive')mr.stop();
+ mr=null;v.pause();recBtn.textContent='● Запис';
+}
+recBtn.onclick=()=>{if(busy)return;mr?stopRec():startRec()};
+
+/* Збереження */
+async function saveBlob(name,blob){
+ if(window.Android){
+  Android.begin(name);const CH=1<<20;
+  for(let o=0;o<blob.size;o+=CH){
+   const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(blob.slice(o,o+CH))});
+   Android.chunk(b64);
+  }
+  return Android.end();
+ }
+ let dl=null;try{dl=window.claude&&await claude.use('downloads')}catch(e){}
+ if(dl){await dl.save({filename:name,data:blob});return name}
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
+ document.body.appendChild(a);a.click();a.remove();return name;
+}
+$('#exp').onclick=async()=>{
+ if(busy||!v.src)return;
+ if(!(v.captureStream||v.mozCaptureStream)||!window.MediaRecorder){say('Цей браузер не вміє записувати відео. Спробуйте Chrome.');return}
+ busy=true;$('#exp').disabled=true;
+ try{
+  init();await ctx.resume();v.pause();v.currentTime=0;
+  await new Promise(r=>{v.addEventListener('seeked',r,{once:true});setTimeout(r,400)});
+  mon.gain.value=0;
+  const vs=v.captureStream?v.captureStream():v.mozCaptureStream();
+  const mix=new MediaStream([...vs.getVideoTracks(),...dest.stream.getAudioTracks()]);
+  const mime=['video/mp4;codecs=avc1,mp4a.40.2','video/webm;codecs=vp9,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m))||'';
+  const ext=mime.startsWith('video/mp4')?'mp4':'webm';
+  const rc=mime?new MediaRecorder(mix,{mimeType:mime}):new MediaRecorder(mix);
+  const parts=[];rc.ondataavailable=e=>{if(e.data.size)parts.push(e.data)};
+  const done=new Promise(r=>rc.onstop=r);
+  const tick=setInterval(()=>say('Збереження… '+fmt(v.currentTime)+' / '+fmt(v.duration)),500);
+  rc.start(1000);
+  const ended=new Promise(r=>v.addEventListener('ended',r,{once:true}));
+  await v.play();await ended;clearInterval(tick);rc.stop();await done;mon.gain.value=1;
+  const where=await saveBlob('ozvuchka_'+Date.now()+'.'+ext,new Blob(parts,{type:ext==='mp4'?'video/mp4':'video/webm'}));
+  say('Готово. Файл: '+where);
+ }catch(e){mon.gain.value=1;say(e&&e.code==='declined'?'Збереження скасовано.':'Не вдалося зберегти відео.')}
+ busy=false;$('#exp').disabled=false;
+};
+
+/* Лише голос: WAV */
+function wav(buf){
+ const d=buf.getChannelData(0),n=d.length,b=new DataView(new ArrayBuffer(44+n*2));
+ const w=(o,t)=>{for(let i=0;i<t.length;i++)b.setUint8(o+i,t.charCodeAt(i))};
+ w(0,'RIFF');b.setUint32(4,36+n*2,true);w(8,'WAVEfmt ');b.setUint32(16,16,true);b.setUint16(20,1,true);b.setUint16(22,1,true);
+ b.setUint32(24,buf.sampleRate,true);b.setUint32(28,buf.sampleRate*2,true);b.setUint16(32,2,true);b.setUint16(34,16,true);
+ w(36,'data');b.setUint32(40,n*2,true);
+ for(let i=0;i<n;i++){const x=Math.max(-1,Math.min(1,d[i]));b.setInt16(44+i*2,x<0?x*0x8000:x*0x7fff,true)}
+ return new Blob([b],{type:'audio/wav'});
+}
+$('#expv').onclick=async()=>{
+ if(busy)return;
+ if(!takes.length){say('Спочатку запишіть голос.');return}
+ busy=true;$('#expv').disabled=true;say('Готую файл…');
+ try{
+  const sr=44100,sh=cfg.sh/1000;
+  const d=Math.max(v.duration||0,...takes.map(k=>k.start+sh+k.buf.duration));
+  const off=new OfflineAudioContext(1,Math.ceil(d*sr),sr);
+  for(const k of takes){
+   if(k.muted)continue;
+   const when=k.start+sh;if(-when>=k.buf.duration)continue;
+   const s=off.createBufferSource(),g=off.createGain();s.buffer=k.buf;g.gain.value=k.vol;s.connect(g);g.connect(off.destination);
+   if(when>=0)s.start(when);else s.start(0,-when);
+  }
+  const r=await off.startRendering();
+  const where=await saveBlob('golos_'+Date.now()+'.wav',wav(r));
+  say('Готово. Файл: '+where);
+ }catch(e){say('Не вдалося зберегти голос.')}
+ busy=false;$('#expv').disabled=false;
+};
+</script>
+</body>
+</html>
